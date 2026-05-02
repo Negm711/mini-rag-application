@@ -1,1 +1,0 @@
-FILE_UPLOAD_FAILED = "file_upload_failed"
