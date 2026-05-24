@@ -1,53 +1,50 @@
-from fastapi import FastAPI, APIRouter, Depends, UploadFile, status
-from fastapi.responses import JSONResponse
-import os
-from helpers.config import get_settings, Settings
-from controllers import DataController, ProjectController
-import aiofiles
+from .BaseController import BaseController
+from .ProjectController import ProjectController
+from fastapi import UploadFile
 from models import ResponseSignal
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-data_router = APIRouter(
-    prefix="/api/v1/data",
-    tags=["api_v1", "data"],
-)
+import re
+import os
 
 
-@data_router.post("/upload/{project_id}")
-async def upload_data(
-    project_id: str, file: UploadFile, app_settings: Settings = Depends(get_settings)
-):
+class DataController(BaseController):
 
-    # validate the file properties
-    data_controller = DataController()
+    def __init__(self):
+        super().__init__()
+        self.size_scale = 1048576  # convert MB to bytes
 
-    is_valid, result_signal = data_controller.validate_uploaded_file(file=file)
+    def validate_uploaded_file(self, file: UploadFile):
 
-    if not is_valid:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST, content={"signal": result_signal}
-        )
+        if file.content_type not in self.app_settings.FILE_ALLOWED_TYPES:
+            return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
 
-    project_dir_path = ProjectController().get_project_path(project_id=project_id)
-    file_path, file_id = data_controller.generate_unique_filepath(
-        orig_file_name=file.filename, project_id=project_id
-    )
+        if file.size > self.app_settings.FILE_MAX_SIZE * self.size_scale:
+            return False, ResponseSignal.FILE_SIZE_EXCEEDED.value
 
-    try:
-        async with aiofiles.open(file_path, "wb") as f:
-            while chunk := await file.read(app_settings.FILE_DEFAULT_CHUNK_SIZE):
-                await f.write(chunk)
-    except Exception as e:
+        return True, ResponseSignal.FILE_VALIDATED_SUCCESS.value
 
-        logger.error(f"Error while uploading file: {e}")
+    def generate_unique_filepath(self, orig_file_name: str, project_id: str):
 
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={"signal": ResponseSignal.FILE_UPLOAD_FAILED.value},
-        )
+        random_key = self.generate_random_string()
+        project_path = ProjectController().get_project_path(project_id=project_id)
 
-    return JSONResponse(
-        content={"signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value, "file_id": file_id}
-    )
+        cleaned_file_name = self.get_clean_file_name(orig_file_name=orig_file_name)
+
+        new_file_path = os.path.join(project_path, random_key + "_" + cleaned_file_name)
+
+        while os.path.exists(new_file_path):
+            random_key = self.generate_random_string()
+            new_file_path = os.path.join(
+                project_path, random_key + "_" + cleaned_file_name
+            )
+
+        return new_file_path, random_key + "_" + cleaned_file_name
+
+    def get_clean_file_name(self, orig_file_name: str):
+
+        # remove any special characters, except underscore and .
+        cleaned_file_name = re.sub(r"[^\w.]", "", orig_file_name.strip())
+
+        # replace spaces with underscore
+        cleaned_file_name = cleaned_file_name.replace(" ", "_")
+
+        return cleaned_file_name
