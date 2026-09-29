@@ -15,9 +15,9 @@ POSTGRES_MAIN_DATABASE="minirag"
 GENERATION_BACKEND = "OPENAI"
 EMBEDDING_BACKEND = "COHERE"
 
-OPENAI_API_KEY="key___"
-OPENAI_API_URL= ""
-COHERE_API_KEY="key___"
+OPENAI_API_KEY="your_openai_api_key_here"
+OPENAI_API_URL=""
+COHERE_API_KEY="your_cohere_api_key_here"
 
 GENERATION_MODEL_ID_LITERAL = ["gpt-4o-mini", "gemma2:9b-instruct-q5_0"]
 GENERATION_MODEL_ID="gpt-4o-mini"
@@ -40,8 +40,8 @@ PRIMARY_LANG = "en"
 DEFAULT_LANG = "en"
 
 # ========================= Celery Task Queue Config =========================
-CELERY_BROKER_URL="amqp://minirag_user:minirag_rabbitmq_2222@localhost:5672/minirag_vhost"
-CELERY_RESULT_BACKEND="redis://:minirag_redis_2222@localhost:6379/0"
+CELERY_BROKER_URL="amqp://minirag_user:minirag_rabbitmq_2222@rabbitmq:5672/minirag_vhost"
+CELERY_RESULT_BACKEND="redis://:minirag_redis_2222@redis:6379/0"
 CELERY_TASK_SERIALIZER="json"
 CELERY_TASK_TIME_LIMIT=600
 CELERY_TASK_ACKS_LATE=false
