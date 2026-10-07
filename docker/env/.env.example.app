@@ -16,11 +16,11 @@ GENERATION_BACKEND = "OPENAI"
 EMBEDDING_BACKEND = "COHERE"
 
 OPENAI_API_KEY="your_openai_api_key_here"
-OPENAI_API_URL=""
+OPENAI_API_URL="https://api.groq.com/openai/v1"
 COHERE_API_KEY="your_cohere_api_key_here"
 
-GENERATION_MODEL_ID_LITERAL = ["gpt-4o-mini", "gemma2:9b-instruct-q5_0"]
-GENERATION_MODEL_ID="gpt-4o-mini"
+GENERATION_MODEL_ID_LITERAL = ["llama3-8b-8192", "gemma2-9b-it", "qwen/qwen3.8-27b"]
+GENERATION_MODEL_ID="qwen/qwen3.8-27b"
 EMBEDDING_MODEL_ID="embed-multilingual-v3.0"
 EMBEDDING_MODEL_SIZE=1024
 

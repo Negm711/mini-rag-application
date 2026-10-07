@@ -63,7 +63,6 @@ class IdempotencyManager:
         session = self.db_client()
         try:
             stmt = select(CeleryTaskExecution).where(
-                CeleryTaskExecution.celery_task_id == celery_task_id,
                 CeleryTaskExecution.task_name == task_name,
                 CeleryTaskExecution.task_args_hash == args_hash
             )
