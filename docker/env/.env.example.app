@@ -1,4 +1,4 @@
-APP_NAME="mini-RAG"
+APP_NAME="RAG"
 APP_VERSION="0.1"
 
 FILE_ALLOWED_TYPES=["text/plain", "application/pdf"]
@@ -9,7 +9,7 @@ POSTGRES_USERNAME="postgres"
 POSTGRES_PASSWORD="your_postgres_password_here"
 POSTGRES_HOST="pgvector"
 POSTGRES_PORT=5432
-POSTGRES_MAIN_DATABASE="minirag"
+POSTGRES_MAIN_DATABASE="postgres"
 
 # ========================= LLM Config =========================
 GENERATION_BACKEND="OPENAI"
@@ -19,7 +19,7 @@ OPENAI_API_KEY="your_openai_api_key_here"
 OPENAI_API_URL="https://api.groq.com/openai/v1"
 COHERE_API_KEY="your_cohere_api_key_here"
 
-GENERATION_MODEL_ID_LITERAL=["llama3-8b-8192", "gemma2-9b-it", "qwen/qwen3.8-27b"]
+GENERATION_MODEL_ID_LITERAL=["llama3-8b-8192", "gemma2-9b-it", "qwen/qwen3.8-27b", "gpt-4o"]
 GENERATION_MODEL_ID="qwen/qwen3.8-27b"
 EMBEDDING_MODEL_ID="embed-multilingual-v3.0"
 EMBEDDING_MODEL_SIZE=1024
@@ -36,7 +36,7 @@ VECTOR_DB_DISTANCE_METHOD="cosine"
 VECTOR_DB_PGVEC_INDEX_THRESHOLD=100
 
 # ========================= Template Config =========================
-PRIMARY_LANG="en"
+PRIMARY_LANG="ar"
 DEFAULT_LANG="en"
 
 # ========================= Celery Task Queue Config =========================
