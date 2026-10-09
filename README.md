@@ -1,73 +1,93 @@
-# Mini-RAG System
+# 🧠 RAG-System API
 
-A scalable and efficient Retrieval-Augmented Generation (RAG) backend API for document processing, semantic search, and question answering. Built with FastAPI, PostgreSQL (PgVector), Celery, and Docker.
+> A production-ready, cloud-native Retrieval-Augmented Generation (RAG) backend API engineered for high throughput, seamless scalability, and asynchronous document processing.
 
-## System Requirements
+## 🏗️ Architecture Overview
 
-- Python 3.10
-- Docker & Docker Compose
+This project implements a **decoupled, microservices-oriented architecture** to ensure robust performance:
 
-## Setup & Installation
+- **API Layer**: Built with **FastAPI** to serve high-performance REST endpoints and interactive OpenAPI documentation.
+- **Asynchronous Task Queue**: Powered by **Celery**, using **RabbitMQ** as the message broker and **Redis** for the result backend. Heavy I/O bound tasks (LLM generation, vector embedding, and document chunking) are offloaded to background workers to guarantee non-blocking API performance.
+- **Vector Database**: Utilizes **PostgreSQL with the `pgvector` extension** (hosted on Supabase) for reliable vector storage and semantic search using cosine similarity.
+- **AI Integration**: Integrates Cohere for dense vector embeddings and Groq/OpenAI models for rapid text generation.
+- **Containerization**: Fully containerized environment via **Docker** and **Docker Compose**, separating application logic from infrastructure services for straightforward cloud deployment.
 
-### 1. Install System Dependencies (Linux/WSL)
-sudo apt update
-sudo apt install libpq-dev gcc python3-dev
+## 🚀 Key Features
 
-### 2. Environment Setup (MiniConda)
-Create and activate an isolated environment:
+- **True Asynchronous Processing**: Complete separation of API request handling and heavy AI task execution.
+- **High-Performance Semantic Search**: Native vector indexing and retrieval via pgvector.
+- **Stateless Core API**: Database, Cache, and Message Brokers are externally managed, making the API fully stateless and scalable.
+- **Ready for Cloud Deployment**: Pre-configured CI/CD workflows and decoupled infrastructure setup.
 
-conda create -n mini-rag python=3.10
-conda activate mini-rag
+## 🛠️ Tech Stack
 
-### 3. Install Python Packages
-pip install -r requirements.txt
+- **Backend Framework**: Python 3.10, FastAPI, Uvicorn, Pydantic
+- **AI Providers**: Cohere (Embeddings), Groq (Generation)
+- **Database**: PostgreSQL + pgvector (Supabase)
+- **Message Broker & Caching**: RabbitMQ (CloudAMQP), Redis (Upstash)
+- **DevOps & Monitoring**: Docker, Docker Compose, GitHub Actions, Prometheus, Nginx
 
-### 4. Environment Variables & Database Migration
-cp .env.example .env
+## 📂 Exact Project Structure
 
-# Note: Update the .env file with your specific credentials (e.g., OPENAI_API_KEY, Database credentials)
+```text
+RAG-System/
+├── .github/workflows/       # CI/CD pipelines for automated deployment
+├── docker/                  # Infrastructure configurations
+│   ├── env/                 # Environment variables for infrastructure
+│   ├── mongodb/             # MongoDB configurations
+│   ├── nginx/               # Reverse proxy settings
+│   ├── prometheus/          # Telemetry and monitoring setup
+│   ├── rabbitmq/            # Message broker configuration
+│   └── docker-compose.yml   # Spins up all local supporting services
+├── mongodb/                 # Database initialization scripts
+├── src/                     # Core Application logic
+│   ├── assets/              # Postman collections and static files
+│   ├── controllers/         # Endpoint request handling
+│   ├── helpers/             # Shared utility functions
+│   ├── models/              # Pydantic schemas and DB entities
+│   ├── routes/              # FastAPI route registrations
+│   ├── stores/              # Vector database interface implementations
+│   ├── tasks/               # Celery worker tasks
+│   ├── utils/               # App-wide utilities
+│   ├── main.py              # Application entry point
+│   ├── celery_app.py        # Celery initialization
+│   ├── flowerconfig.py      # Flower dashboard configuration
+│   └── requirements.txt     # Python dependencies
+└── README.md                # Project documentation
+```
 
-alembic upgrade head
+## ⚙️ Environment Configuration
 
-## Running the Services
+Create a `.env` file in the root directory to connect external services:
 
-### Docker Compose (Production/Full Stack)
-To spin up all services including databases, messaging queues, and monitoring tools:
+```env
+# Database (Supabase)
+POSTGRES_USERNAME="postgres"
+POSTGRES_PASSWORD="<your_password>"
+POSTGRES_HOST="<your_supabase_host>"
+POSTGRES_PORT=5432
+POSTGRES_MAIN_DATABASE="postgres"
 
-cd docker
-cp .env.example .env
+# AI Service Providers
+OPENAI_API_KEY="<your_groq_or_openai_key>"
+OPENAI_API_URL="[https://api.groq.com/openai/v1](https://api.groq.com/openai/v1)"
+COHERE_API_KEY="<your_cohere_key>"
 
-# Update .env with your credentials
+# Task Queue (CloudAMQP & Upstash)
+CELERY_BROKER_URL="<your_rabbitmq_url>"
+CELERY_RESULT_BACKEND="<your_redis_url>"
 
-sudo docker compose up -d
+# Vector Search Configuration
+VECTOR_DB_BACKEND="PGVECTOR"
+VECTOR_DB_DISTANCE_METHOD="cosine"
+```
 
-#### Access Points:
-- FastAPI (Swagger UI): http://localhost:8000
-- Flower Dashboard: http://localhost:5555 (admin/password from env)
-- Grafana: http://localhost:3000
-- Prometheus: http://localhost:9090
+## 🐳 Deployment & Execution
 
----
-
-### Local Development Mode
-
-If you prefer running services manually for debugging:
-
-1. Run FastAPI Server:
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-2. Run Celery Services (Separate Terminals):
-
-- Worker:
-python -m celery -A celery_app worker --queues=default,file_processing,data_indexing --loglevel=info
-
-- Beat Scheduler:
-python -m celery -A celery_app beat --loglevel=info
-
-- Flower Dashboard:
-python -m celery -A celery_app flower --conf=flowerconfig.py
-
-## API Testing
-
-Download the POSTMAN collection to test the endpoints: 
-/assets/mini-rag-app.postman_collection.json
+**Containerized Execution:**
+```bash
+cd src
+docker build -t rag-system-api .
+docker run -p 8000:8000 --env-file .env rag-system-api
+```
+Access the interactive API documentation at `http://localhost:8000/docs`.
